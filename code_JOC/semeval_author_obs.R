@@ -14,23 +14,13 @@ library(rbenchmark)
 args <- commandArgs(trailingOnly=TRUE)
 i <- as.numeric(args)
 
-#file_list <- list.files("/Users/wangguanshen/Desktop/keyphrase/SemEval2010/pre_process")
-#author_key_list <- list.files("/Users/wangguanshen/Desktop/keyphrase/SemEval2010/pre_process_author_truth")
-#reader_key_list <- list.files("/Users/wangguanshen/Desktop/keyphrase/SemEval2010/pre_process_reader_truth")
-
 file_list <- list.files("/users/guanshenw/scratch/keyphrase/2010_train/pre_process")
 author_key_list <- list.files("/users/guanshenw/scratch/keyphrase/2010_train/pre_process_author_truth")
 reader_key_list <- list.files("/users/guanshenw/scratch/keyphrase/2010_train/pre_process_reader_truth")
 
 
-
-#file_list <- list.files("/users/guanshenw/scratch/keyphrase/2010_train/pre_process")
-#/Users/wangguanshen/Downloads/keyphrase/SemEval2010/pre_process
-
 big.graph.generate <- function(i){
-  #long_text <- tolower(readChar(paste("/users/guanshenw/scratch/keyphrase/2010_train/pre_process/",file_list[i],sep=""), nchars=10e6, useBytes = FALSE))
   long_text <- tolower(readChar(paste("/users/wangguanshen/Desktop/keyphrase/SemEval2010/pre_process/",file_list[i],sep=""), nchars=10e6, useBytes = FALSE))
-  #long_text <- gsub("[/=]", " ", long_text)
   long_text <- gsub("[[:punct:]]", "", long_text)
   long_out <- fcm(long_text, context = "window", window = 2,tri=F)
   n <- nrow(long_out)
@@ -50,28 +40,21 @@ big.graph.generate <- function(i){
   D_minus <- diag(as.vector(A_minus%*%rep(1,n_minus)))
   
   key_directory <- paste0("/users/guanshenw/scratch/keyphrase/2010_train/pre_process_truth/",gsub(".txt.final","",file_list[i]))
-  #key_directory <- paste0("/Users/wangguanshen/Desktop/keyphrase/SemEval2010/pre_process_truth/",gsub(".txt.final","",file_list[i]))
   long_key <- gsub("[\t\r;]","",tolower(readChar(key_directory, nchars=10e6, useBytes = FALSE)))
   long_key <- gsub(",", " ",long_key)
   longkey_list <- strsplit(long_key, " ")[[1]]
   long_truth <- unique(long_test[longkey_list[longkey_list %in% rownames(long_test)],2])
   dictionary_minus = cbind(long_test[-minus_list,2],seq(n_minus))
-  #print(dictionary_minus)
   truth_minus <- unique(dictionary_minus[longkey_list[longkey_list %in% rownames(dictionary_minus)],2])
-  
-  #obs_key_directory <- paste0("/Users/wangguanshen/Desktop/keyphrase/SemEval2010/pre_process_author_truth/",gsub(".txt.final","",author_key_list[i]))
   obs_key_directory <- paste0("/users/guanshenw/scratch/keyphrase/2010_train/pre_process_author_truth/",gsub(".txt.final","",author_key_list[i]))
   obs_key <- gsub("[\t\r;]","",tolower(readChar(obs_key_directory, nchars=10e6, useBytes = FALSE)))
   obs_key <- gsub(",", " ",obs_key)
   obskey_list <- strsplit(obs_key, " ")[[1]]
   obs <- unique(dictionary_minus[obskey_list[obskey_list %in% rownames(dictionary_minus)],2])  
-  #print(truth_minus)
   return(list(file=file_list[i],n=n,A=A,D=D,dictionary=long_test,truth=long_truth,A_minus=A_minus,
               D_minus=D_minus,n_minus=n_minus1,minus_list=minus_list,dictionary_minus=dictionary_minus,
               truth_minus=truth_minus,obs=obs))
 }
-#graph <- big.graph.generate(55)
-#big.graph<- big.graph.generate(2)
 inv_logit <- function(x){
   return(exp(x)/(1 + exp(x)))
 }
@@ -157,36 +140,21 @@ semi.keyphrase2 <- function(graph,grid){
   True_Y_minus <- rep(0,n_minus)
   True_Y_minus[truth_minus]=1
   Y_minus <- rep(0,n_minus)
-  #Y_minus[sample(truth_minus,k,replace=FALSE,prob = 1/truth_minus)] = 1 #inverse weight
-  #Y_minus[sort(truth_minus)[1:5]] = 1 #observed from the title
   Y_minus[obs_label] = 1 
-  #Y_minus[sample(truth_minus,k,replace=FALSE)] = 1
-  #obs_label <- which(Y_minus==1)
-  #Y_minus[obs_label]=1
   Base_Line_minus <- solve(B_star_minus)%*%Y_minus
   T <- 50000
   Burn_in <- 2000
-  #ini <- Base_to_start(Base_Line_minus)
-  #ini <- Base_to_start(u_0_minus)
+
   ini <-Base_Line_minus
   alpha_est <- alpha_find(u_0_minus,Y_minus,grid)
   
   test.chain <- Gibbs.MH(Burn_in,T,ini,n_minus,graph,Y_minus,B_minus,u_0_minus,alpha_est,grid)
-  
-  #per <- seq(0.05,1,0.05)
-  #pre.rec.auc.md <- precision.recall.auc(Y_minus,True_Y_minus,test.chain$poster_pi_md,per,k)
-  #pre.rec.auc.mn <- precision.recall.auc(Y_minus,True_Y_minus,test.chain$poster_pi_mn,per,k)
-  #pre.rec.auc.mnV2 <- precision.recall.auc(Y_minus,True_Y_minus,test.chain$poster_pi_mnV2,per,k)
-  #pre.rec.auc.u_0 <- precision.recall.auc(Y_minus,True_Y_minus,c(u_0_minus),per,k)
-  #pre.rec.auc.bl <- precision.recall.auc(Y_minus,True_Y_minus,c(Base_Line_minus),per,k)
+
   
   return(list(file = file,poster_pi_md=test.chain$poster_pi_md,poster_pi_mn=test.chain$poster_pi_mn,poster_pi_mnV2=test.chain$poster_pi_mnV2,
               truth_minus=truth_minus,obs_label=obs_label,dictionary_minus=graph$dictionary_minus,
               u_0_minus=c(u_0_minus),Base_Line_minus=c(Base_Line_minus),Y_minus=Y_minus,
               alpha_est = test.chain$alpha_mn,n=graph$n,
-              #sigma2_store=test.chain$sigma2_store,
-              #pos_md=pre.rec.auc.md,pos_mn=pre.rec.auc.mn,pos_mnV2=pre.rec.auc.mnV2,
-              #textrank=pre.rec.auc.u_0,semi=pre.rec.auc.bl,
               accept_rate=test.chain$accept/T))
 }
 
@@ -194,7 +162,6 @@ semi.keyphrase2 <- function(graph,grid){
 #Given the FDR, find out where the cutoff is. 
 FDR_cutoff <- function(poster_pi_md,c,Y,truth){
   poster_md_adjust <- force_obs_to_key2(Y,poster_pi_md)
-  #poster_md_adjust <- poster_pi_md
   cutoffs <- unique(sort(poster_md_adjust,decreasing = TRUE))
   FDRs <- vec_FDR_cal(cutoffs,poster_md_adjust)
   index <- max(which(FDRs<c))
@@ -208,7 +175,6 @@ vec_FDR_cutoff <- Vectorize(FDR_cutoff,"c")
 
 FDR_cutoff2 <- function(poster_pi_md,c,Y,truth){
   poster_md_adjust <- (poster_pi_md - min(poster_pi_md))/ (max(poster_pi_md) - min(poster_pi_md)) - 0.25
-  #poster_md_adjust <- (poster_pi_md - min(poster_pi_md))/ (max(poster_pi_md) - min(poster_pi_md)) - 0.15
   poster_md_adjust <- force_obs_to_key2(Y,poster_md_adjust)
   cutoffs <- unique(sort(poster_md_adjust,decreasing = TRUE))
   FDRs <- vec_FDR_cal(cutoffs,poster_md_adjust)
@@ -262,35 +228,15 @@ alpha_lk <- function(Base_Line,Y,alpha){
 vec.alpha_lk <- Vectorize(alpha_lk,vectorize.args = 'alpha')
 
 alpha_find <- function(Base_Line,Y,grid){
-  #grid <- seq(alpha_min,alpha_max,0.01)
   alpha_est <- grid[which.max(vec.alpha_lk(Base_Line,Y,grid))] 
   return(alpha_est)
 }
 set.seed(12345)
-#obs_label1 <- c(1,2,3,4,5,6,8,28)
-#k1 <- length(obs_label1)
-#update 2022!
-#build up a for loop for it!
-#was only run if more than 15 keyphrases
-#now run on every article
+
 alpha_min <- (10-5)/10
 alpha_max <- (150-5)/150
 grid <- (seq(10,150)-5)/seq(10,150)
-#k=5
 start_time <- Sys.time()
-#cl <- makeCluster(5)
-#clusterEvalQ(cl, library("mvtnorm"))
-#clusterEvalQ(cl, library("quanteda"))
-#clusterEvalQ(cl, library("coda"))
-#clusterEvalQ(cl, library("MASS"))
-#clusterEvalQ(cl, library("invgamma"))
-#clusterEvalQ(cl, library("pROC"))
-#clusterEvalQ(cl, library("ROCR"))
-#clusterExport(cl, c("big.graph.generate", "inv_logit","posterior_gibbstheta","posterior_gibbstheta2","Base_to_start","Gibbs.MH",
-#                    "semi.keyphrase2","FDR_cutoff","vec_FDR_cutoff","FDR_calculate","vec_FDR_cal","precision.recall.auc","force_obs_to_key",
-#                    "force_obs_to_key2","alpha_find","alpha_lk","vec.alpha_lk",
-#                    "file_list","alpha_min","alpha_max","grid","k"), 
-#              envir=environment())
 
 group_article <- function(j){
   total_ans <- list()
@@ -306,33 +252,9 @@ group_article <- function(j){
   return(total_ans)
 }
 total_ans <- group_article(i)
-#get_file_list(file_list)
 
-#total_ans1_obs_title <- parSapply(cl , 1:5 , group_article)
-#total_ans2_obs_title <- parSapply(cl , 6:10 , group_article)
-
-#total_ans1_obs_title_v4 <- parSapply(cl , 1:5 , group_article)
-#total_ans2_obs_title_v4 <- parSapply(cl , 6:10 , group_article)
-
-#total_ans3_obs_title <- parSapply(cl , 11:15 , group_article)
-#test1 <- parSapply(cl , 1:5 , group_article)
-#test2 <- parSapply(cl , 6:10 , group_article)
-
-#total_ans2 <- parSapply(cl , 5:10 , group_article)
-
-#total_ans1 <- parSapply(cl , 1:5 , group_article)
 end_time <- Sys.time()
 end_time - start_time
-#save(total_ans1_obs_title,file = "/Users/wangguanshen/Downloads/keyphrase/results/long_article_obs_title1.Rdata")
-#save(total_ans2_obs_title,file = "/Users/wangguanshen/Downloads/keyphrase/results/long_article_obs_title2.Rdata")
-#v2: re-preprocessed data
-#v3: ini back to basetostart u0
-#v4: ini back to basetostart base_line
-#v3 and v4 is not good
 save_path <- paste("Semeval_obs_author_",as.numeric(i),".Rdata",sep="")
 
 save(total_ans,file=save_path)      
-
-#save(total_ans3_obs_title,file = "/Users/wangguanshen/Downloads/keyphrase/SemEval2010/pre_process/long_article_obs_title3.Rdata")
-
-#save(total_ans2,file = "/Users/wangguanshen/Downloads/keyphrase/SemEval2010/pre_process/long_article_test2.Rdata")
