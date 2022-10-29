@@ -1,11 +1,11 @@
 # BSS-Keyphrase-Extraction
 
-[text files: /data_JOC]
+
 
 
 --------------------------------------------------------------------------
 [datasets]
-
+[text files: /data_JOC]
 - short article data from Hulth 2003 :  500 articles, 300 (No.201-No.500) of them are used: ./short_articles/pre_process
 all short articles data files are tokenized and pos-taggered.
 
@@ -25,12 +25,11 @@ the review is tokenized, pos-taggered and also stemmed.
 - observed keywords from Semeval 2010: ./pre_process_author_truth
 - ground truth from Semeval 2010: ./pre_process_reader_truth
 
-
-[text files: /code_JOC]
-Code implementation for BSS keyword extraction method, textrank(TR) and Semi-supervised(SS) are also available.
 --------------------------------------------------------------------------
 [code for analysis]
+[text files: /code_JOC]
 
+Code implementation for BSS keyword extraction method, textrank(TR) and Semi-supervised(SS) are also available.
 code for 300 short articles:
 
 - ./main_graph.R: main function to run short article examples for Hulth data.
