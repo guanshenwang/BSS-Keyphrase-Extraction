@@ -27,7 +27,7 @@ the review is tokenized, pos-taggered and also stemmed.
 
 
 [text files: /code_JOC]
-
+Code implementation for BSS keyword extraction method, textrank(TR) and Semi-supervised(SS) are also available.
 --------------------------------------------------------------------------
 [code for analysis]
 
