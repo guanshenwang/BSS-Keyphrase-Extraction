@@ -6,7 +6,6 @@ library(invgamma)
 library(pROC)
 library(ROCR)
 big.graph.generate <- function (article){
-  #long_text <- tolower(readChar(paste("/users/guanshenw/scratch/keyphrase/2010_train/",article,sep=""), nchars=10e6, useBytes = FALSE))
   long_text <- tolower(readChar(paste("/users/wangguanshen/Desktop/keyphrase/SemEval2010/train_preprocess/",article,sep=""), nchars=10e6, useBytes = FALSE))
   long_text <- gsub("[/=]", " ", long_text)
   long_out <- fcm(long_text, context = "window", window = 2,tri=F)
@@ -193,7 +192,6 @@ force_obs_to_key2 <- function (Y,poster_pi_mean){
   return(poster_pi_mean)
 }
 alpha_find <- function(Base_Line,Y,grid){
-  #grid <- seq(alpha_min,alpha_max,0.01)
   alpha_est <- grid[which.max(vec.alpha_lk(Base_Line,Y,grid))] 
   return(alpha_est)
 }
@@ -204,47 +202,18 @@ alpha_lk <- function(Base_Line,Y,alpha){
 vec.alpha_lk <- Vectorize(alpha_lk,vectorize.args = 'alpha')
 
 grid <- (seq(10,42)-5)/seq(10,42)
-#alpha <- (length(big.graphH41$truth_minus) - k) / length(big.graphH41$truth_minus)
-#Ans <- semi.keyphrase_Gibbs_MH(big.graph42,alpha=0.5,5,5)
-#situation 1
-#RNGkind(sample.kind = "Rounding")
 set.seed(541)
-#obs_label1 <- c(1,2,3,4,5,6,8,28)
 obs_label1 <- c(8,13,10,11,69,29)
 k1 <- length(obs_label1)
-#alpha <- (length(big.graphH41$truth_minus) - k) / length(big.graphH41$truth_minus)
-#Ans <- semi.keyphrase_Gibbs_MH(big.graph42,alpha=0.5,5,5)
+
 Ans1 <- semi.keyphrase2(big.graphH41,obs_label1,grid)
 save(Ans1,file = "/users/guanshenw/scratch/keyphrase/biggraphC42(sub_title).Rdata")
 positive1 <- vec_FDR_cutoff(Ans1$poster_pi_mn,0.25,Ans1$Y_minus,Ans1$truth_minus)[[1]] # of positive identified by BSS method
 positive1
-#Observed keyphrase in situation 1.
-Ans1$dictionary_minus[Ans1$obs_label,]
+Ans1$dictionary_minus[Ans1$obs_label,]#check observed keywords
 
 #True positives from each method
-rownames(Ans1$dictionary_minus[intersect(sort(order(force_obs_to_key2(Ans1$Y_minus,Ans1$poster_pi_mn),decreasing = T)[1:positive1]),Ans1$truth_minus),])
 rownames(Ans1$dictionary_minus[intersect(sort(order(force_obs_to_key(Ans1$Y_minus,Ans1$u_0_minus,k1),decreasing = T)[1:positive1]),Ans1$truth_minus),])
 rownames(Ans1$dictionary_minus[intersect(sort(order(Ans1$Base_Line_minus,decreasing = T)[1:positive1]),Ans1$truth_minus),])
-
 rownames(Ans1$dictionary_minus[intersect(sort(order(Ans1$Y_minus,Ans1$poster_pi_mn,decreasing = T)[1:positive1]),Ans1$truth_minus),])
-
-#situation 2
-#RNGkind(sample.kind = "Rounding")
-#RNGkind(sample.kind = "default")
-#set.seed(12345)
-#obs_label2 <- c(4,5,6,37,38)
-#k2 <- length(obs_label2)
-#Ans2 <- semi.keyphrase2(big.graphH41,obs_label2,grid)
-#save(Ans2,file = "/users/guanshenw/scratch/keyphrase/biggraphC42(sub_random5).Rdata")
-
-#positive2 <- vec_FDR_cutoff(Ans2$poster_pi_mn,0.25,Ans2$Y_minus,Ans2$truth_minus)[[1]] # of positive identified by BSS method
-#positive2
-#Observed keyphrase in situation 2.
-#Ans2$dictionary_minus[Ans2$obs_label,]
-
-
-#True positives from each method
-#rownames(Ans2$dictionary_minus[intersect(sort(order(force_obs_to_key2(Ans2$Y_minus,Ans2$poster_pi_mn),decreasing = T)[1:positive2]),Ans2$truth_minus),])
-#rownames(Ans2$dictionary_minus[intersect(sort(order(force_obs_to_key(Ans2$Y_minus,Ans2$u_0_minus,5),decreasing = T)[1:positive2]),Ans2$truth_minus),])
-#rownames(Ans2$dictionary_minus[intersect(sort(order(Ans2$Base_Line_minus,decreasing = T)[1:positive2]),Ans2$truth_minus),])
 
