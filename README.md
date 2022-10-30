@@ -13,6 +13,9 @@ all short articles data files are tokenized and pos-taggered.
 
 - short article data ground truths from Hulth 2003 : ./short_article/keywords
 
+Hulth 2003 dataset reference: 
+
+Improved automatic keyword extraction given more linguistic knowledge Anette Hulth. In Proceedings of EMNLP 2003. p. 216-223.
 
 - long article example with ground truth: ./C-42.txt
 the article is tokenized, pos-taggered and also stemmed. 
@@ -26,7 +29,14 @@ the review is tokenized, pos-taggered and also stemmed.
 - long article data from Semeval 2010: ./pre_process
 - observed keywords from Semeval 2010: ./pre_process_author_truth
 - ground truth from Semeval 2010: ./pre_process_reader_truth
-all articles are tokenized, pos-taggered and also stemmed. 
+all articles are tokenized, pos-taggered and also stemmed.
+
+Semeval 2010 dataset reference:
+
+Kim SN, Medelyan O, Kan MY, Baldwin T (2010) Semeval-2010 task 5 : Automatic keyphrase extraction from scientific articles. Proceedings of the 5th International Workshop on Semantic Evaluation, 21–26.
+
+The original dataset is available: https://semeval2.fbk.eu/semeval2.php?location=download&task_id=6&datatype=test
+
 --------------------------------------------------------------------------
 [code for analysis]
 
